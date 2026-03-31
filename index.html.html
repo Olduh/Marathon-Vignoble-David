@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marathon du Vignoble — Plan David</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap');
+
+:root {
+  --ink: #1a1814;
+  --paper: #f5f0e8;
+  --cream: #ede8dc;
+  --rust: #b84c1e;
+  --rust-light: #f5e0d8;
+  --sage: #4a6741;
+  --sage-light: #d4ddd2;
+  --amber: #c8860a;
+  --amber-light: #f0e4c4;
+  --muted: #8a8278;
+  --border: #c8c0b0;
+  --couple: #6b4c8a;
+  --couple-light: #e4dced;
+  --velo: #1a6b8a;
+  --velo-light: #d0eaf5;
+  --renfo: #7a4a1e;
+  --renfo-light: #f0e0cc;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Fraunces', Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 36px 48px 32px;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content:''; position:absolute; top:-40px; right:-40px;
+  width:220px; height:220px; border:1px solid rgba(255,255,255,0.07); border-radius:50%;
+}
+.header-label {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+}
+header h1 {
+  font-size:clamp(26px,5vw,46px); font-weight:700;
+  line-height:1.05; letter-spacing:-.02em;
+}
+header h1 em { font-style:italic; color:var(--rust); }
+.header-meta {
+  display:flex; gap:28px; margin-top:20px; flex-wrap:wrap;
+}
+.meta-item { display:flex; flex-direction:column; gap:2px; }
+.meta-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+.meta-value { font-size:13px; font-weight:300; color:rgba(245,240,232,.9); }
+
+/* ─── ALERTS ─── */
+.alerts {
+  background:#1e1a16; padding:10px 48px;
+  display:flex; gap:16px; flex-wrap:wrap;
+}
+.alert-badge {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em;
+  padding:4px 10px; border-radius:2px; display:flex; align-items:center; gap:6px;
+}
+.alert-badge.injury { background:rgba(184,76,30,.2); color:#e8a080; border:1px solid rgba(184,76,30,.3); }
+.alert-badge.couple { background:rgba(107,76,138,.2); color:#c0a8d8; border:1px solid rgba(107,76,138,.3); }
+
+/* ─── TABS ─── */
+.tabs {
+  display:flex; gap:0; border-bottom:2px solid var(--border);
+  background:white; padding:0 48px;
+  position:sticky; top:0; z-index:100;
+}
+.tab-btn {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+  padding:14px 20px; border:none; background:transparent; color:var(--muted);
+  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px;
+  transition:all .15s;
+}
+.tab-btn:hover { color:var(--ink); }
+.tab-btn.active { color:var(--ink); border-bottom-color:var(--rust); }
+
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* ─── MAIN ─── */
+.main { max-width:1180px; margin:0 auto; padding:0 24px 60px; }
+
+/* ─── CONTROLS ─── */
+.controls {
+  display:flex; gap:10px; padding:24px 0 16px; flex-wrap:wrap; align-items:center;
+}
+.filter-btn {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  padding:6px 12px; border:1px solid var(--border); background:transparent;
+  color:var(--muted); cursor:pointer; transition:all .15s; border-radius:2px;
+}
+.filter-btn:hover { background:var(--cream); color:var(--ink); }
+.filter-btn.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.week-counter { margin-left:auto; font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
+
+/* ─── BLOCK HEADER ─── */
+.block-header {
+  display:flex; align-items:baseline; gap:14px;
+  padding:20px 0 10px; border-top:1px solid var(--border); margin-top:4px;
+}
+.block-name { font-size:17px; font-weight:700; letter-spacing:-.01em; }
+.block-desc { font-size:12px; font-weight:300; font-style:italic; color:var(--muted); }
+
+/* ─── WEEK ROW ─── */
+.week-row {
+  display:grid;
+  grid-template-columns: 76px repeat(7, 1fr) 100px;
+  gap:6px;
+  margin-bottom:10px;
+  align-items:start;
+  animation:fadeIn .2s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:none} }
+
+.week-label {
+  padding-top:10px; font-family:'DM Mono',monospace; font-size:10px;
+  letter-spacing:.1em; color:var(--muted); text-align:right; padding-right:8px;
+}
+.week-label strong {
+  display:block; font-size:15px; font-family:'Fraunces',serif;
+  font-weight:700; color:var(--ink); letter-spacing:-.02em;
+}
+.week-label.decharge strong { color:var(--sage); }
+.week-label.peak strong { color:var(--rust); }
+
+/* ─── SESSION CARD ─── */
+.session-card {
+  background:white; border:1px solid var(--border);
+  border-radius:3px; padding:10px 12px;
+  position:relative; transition:box-shadow .15s; cursor:pointer;
+  min-height:80px;
+}
+.session-card:hover { box-shadow:0 2px 10px rgba(26,24,20,.1); }
+.session-day {
+  font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:5px;
+}
+.session-type {
+  font-size:12px; font-weight:700; letter-spacing:-.01em; margin-bottom:3px; line-height:1.2;
+}
+.session-details { font-size:11px; font-weight:300; color:#5a5550; line-height:1.5; }
+.session-allure {
+  font-family:'DM Mono',monospace; font-size:9px; color:var(--muted);
+  margin-top:5px; letter-spacing:.04em;
+}
+.session-rpe {
+  display:inline-block; margin-top:4px; padding:2px 6px; border-radius:2px;
+  font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.1em;
+}
+.rpe-1 { background:#e8f5e4; color:#2d6a27; }
+.rpe-2 { background:#d4ddd2; color:#3a5a38; }
+.rpe-3 { background:var(--amber-light); color:#8a5a00; }
+.rpe-4 { background:#fde8d8; color:#8a3a10; }
+
+/* Card types */
+.session-card.ef { border-left:3px solid var(--sage); }
+.session-card.ef .session-type { color:var(--sage); }
+.session-card.long { border-left:3px solid var(--rust); }
+.session-card.long .session-type { color:var(--rust); }
+.session-card.couple { border-left:3px solid var(--couple); background:#fdfbff; }
+.session-card.couple .session-type { color:var(--couple); }
+.session-card.decharge { border-left:3px solid var(--amber); }
+.session-card.decharge .session-type { color:var(--amber); }
+.session-card.velo {
+  border-left:3px solid var(--velo); background:#f8fdff;
+  min-height:60px;
+}
+.session-card.velo .session-type { color:var(--velo); }
+.session-card.renfo {
+  border-left:3px solid var(--renfo); background:#fdf9f5;
+  min-height:60px;
+}
+.session-card.renfo .session-type { color:var(--renfo); }
+.session-card.repos {
+  background:var(--cream); border:1px dashed var(--border);
+  display:flex; align-items:center; justify-content:center; min-height:60px;
+}
+.session-card.repos .session-type { color:var(--muted); font-weight:300; font-style:italic; }
+.session-card.race { border-left:4px solid var(--rust); background:#fff8f5; }
+.session-card.race .session-type { color:var(--rust); }
+
+.couple-badge {
+  position:absolute; top:6px; right:6px;
+  font-family:'DM Mono',monospace; font-size:7px; letter-spacing:.1em;
+  background:var(--couple-light); color:var(--couple);
+  padding:2px 5px; border-radius:2px;
+}
+
+/* ─── WEEK VOLUME ─── */
+.week-volume { padding-top:10px; text-align:right; }
+.vol-num {
+  font-family:'DM Mono',monospace; font-size:20px;
+  font-weight:500; letter-spacing:-.03em; line-height:1;
+}
+.vol-unit {
+  font-family:'DM Mono',monospace; font-size:8px;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--muted);
+}
+.vol-bar {
+  width:72px; height:3px; background:var(--cream);
+  border-radius:2px; margin-top:5px; overflow:hidden; margin-left:auto;
+}
+.vol-fill { height:100%; border-radius:2px; background:var(--sage); transition:width .4s ease; }
+.vol-fill.high { background:var(--amber); }
+.vol-fill.peak { background:var(--rust); }
+.acwr-badge {
+  font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.08em;
+  padding:2px 5px; border-radius:2px; margin-top:4px; display:inline-block;
+}
+.acwr-ok { background:var(--sage-light); color:var(--sage); }
+.acwr-warn { background:var(--amber-light); color:var(--amber); }
+.acwr-alert { background:var(--rust-light); color:var(--rust); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(26,24,20,.6); z-index:1000;
+  align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:white; border-radius:6px; max-width:520px; width:100%;
+  max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(26,24,20,.3);
+  animation:modalIn .2s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:none} }
+.modal-header {
+  padding:24px 24px 16px;
+  border-bottom:1px solid var(--border);
+}
+.modal-day {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:6px;
+}
+.modal-title { font-size:20px; font-weight:700; letter-spacing:-.02em; }
+.modal-body { padding:20px 24px; }
+.modal-section { margin-bottom:18px; }
+.modal-section-label {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.modal-section-label::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+.modal-section p, .modal-section li {
+  font-size:13px; font-weight:300; line-height:1.65; color:#3a3530;
+}
+.modal-section ul { list-style:none; padding:0; }
+.modal-section li { padding-left:14px; position:relative; margin-bottom:4px; }
+.modal-section li::before { content:'—'; position:absolute; left:0; color:var(--muted); }
+.rpe-display {
+  display:flex; align-items:center; gap:10px; margin:8px 0;
+  padding:10px 14px; background:var(--cream); border-radius:3px;
+}
+.rpe-number {
+  font-family:'DM Mono',monospace; font-size:28px; font-weight:500; line-height:1;
+}
+.rpe-desc { font-size:12px; font-weight:300; color:#5a5550; }
+.rpe-verb { font-size:13px; font-weight:700; }
+.modal-close {
+  display:block; width:100%; padding:14px; border:none;
+  background:var(--ink); color:var(--paper);
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.15em;
+  text-transform:uppercase; cursor:pointer; border-radius:0 0 6px 6px;
+  transition:background .15s;
+}
+.modal-close:hover { background:#2e2a24; }
+
+/* ─── CHART TAB ─── */
+.chart-section { padding:28px 0; }
+.chart-title {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:20px;
+}
+.chart-container {
+  background:white; border:1px solid var(--border); border-radius:4px;
+  padding:24px 20px 16px; margin-bottom:24px;
+}
+canvas { width:100% !important; }
+.chart-legend {
+  display:flex; gap:20px; flex-wrap:wrap; margin-top:16px;
+}
+.chart-legend-item {
+  display:flex; align-items:center; gap:7px;
+  font-size:12px; font-weight:300; color:var(--muted);
+}
+.chart-legend-dot { width:12px; height:4px; border-radius:2px; }
+.chart-legend-line { width:20px; height:2px; position:relative; }
+.chart-legend-line::after {
+  content:''; position:absolute; top:-3px; left:50%;
+  transform:translateX(-50%); width:6px; height:6px;
+  border-radius:50%; background:inherit;
+}
+
+/* ─── NUTRITION TAB ─── */
+.nutrition-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:16px; padding:24px 0;
+}
+@media (max-width:700px) { .nutrition-grid { grid-template-columns:1fr; } }
+.nutri-card {
+  background:white; border:1px solid var(--border);
+  border-radius:4px; padding:20px;
+}
+.nutri-card-header {
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.nutri-icon {
+  font-size:20px; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--cream); border-radius:3px;
+}
+.nutri-title { font-size:15px; font-weight:700; letter-spacing:-.01em; }
+.nutri-subtitle { font-size:11px; font-weight:300; color:var(--muted); font-style:italic; }
+.nutri-item {
+  margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--cream);
+}
+.nutri-item:last-child { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+.nutri-item-label {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:5px;
+}
+.nutri-item p {
+  font-size:12px; font-weight:300; line-height:1.6; color:#3a3530;
+}
+.nutri-item strong { font-weight:700; color:var(--ink); }
+.nutri-alert {
+  background:var(--amber-light); border:1px solid rgba(200,134,10,.3);
+  border-radius:3px; padding:10px 14px; margin-top:10px;
+  font-size:12px; font-weight:300; color:#6a4400; line-height:1.6;
+}
+
+/* ─── LEGEND ─── */
+.legend {
+  display:flex; gap:16px; flex-wrap:wrap;
+  padding:20px 0 0; border-top:1px solid var(--border); margin-top:20px;
+}
+.legend-item {
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:300; color:var(--muted);
+}
+.legend-dot { width:10px; height:10px; border-radius:1px; }
+
+/* ─── NOTES ─── */
+.notes-section {
+  margin-top:32px; padding:24px; background:var(--ink);
+  color:var(--paper); border-radius:4px;
+}
+.notes-title {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:16px;
+}
+.notes-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media (max-width:600px) { .notes-grid { grid-template-columns:1fr; } }
+.note-block h4 { font-size:13px; font-weight:700; margin-bottom:7px; color:var(--rust); }
+.note-block ul { list-style:none; padding:0; }
+.note-block li {
+  font-size:11px; font-weight:300; line-height:1.7;
+  color:rgba(245,240,232,.75); padding-left:12px; position:relative;
+}
+.note-block li::before { content:'—'; position:absolute; left:0; color:var(--muted); }
+.note-block p { font-size:11px; font-weight:300; line-height:1.7; color:rgba(245,240,232,.75); }
+
+
+/* ─── TOOLTIP ─── */
+.tip {
+  position:relative; cursor:help;
+  border-bottom:1px dashed var(--muted);
+  display:inline;
+}
+.tip::after {
+  content:attr(data-tip);
+  position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+  background:var(--ink); color:var(--paper);
+  font-family:'DM Mono',monospace; font-size:10px; line-height:1.5;
+  padding:7px 11px; border-radius:3px; white-space:nowrap;
+  pointer-events:none; opacity:0; transition:opacity .15s;
+  z-index:500; max-width:260px; white-space:normal; text-align:left;
+  font-style:normal; font-weight:400;
+}
+.tip:hover::after { opacity:1; }
+
+/* ─── PRIORITY BADGE ─── */
+.prio-badge {
+  position:absolute; bottom:7px; right:7px;
+  font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.08em;
+  padding:2px 6px; border-radius:2px; font-weight:500;
+}
+.prio-1 { background:#ffecd4; color:#b85000; border:1px solid rgba(184,76,30,.3); }
+.prio-2 { background:var(--amber-light); color:#8a5a00; border:1px solid rgba(200,134,10,.3); }
+.prio-3 { background:var(--sage-light); color:#2d5a28; border:1px solid rgba(74,103,65,.3); }
+
+/* ─── PLAN B ─── */
+.planb-section {
+  background:#f0f4ef; border:1px solid var(--sage-light);
+  border-left:3px solid var(--sage);
+  border-radius:3px; padding:14px 18px; margin-top:10px; margin-bottom:4px;
+}
+.planb-title {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--sage); margin-bottom:8px;
+  display:flex; align-items:center; gap:6px;
+}
+.planb-title::before { content:'↓'; font-size:11px; }
+.planb-body { font-size:12px; font-weight:300; color:#2d4a2a; line-height:1.65; }
+.planb-body strong { font-weight:700; color:var(--sage); }
+
+/* ─── LEXIQUE ─── */
+.lexique-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:14px; padding:24px 0;
+}
+@media(max-width:700px){ .lexique-grid{grid-template-columns:1fr;} }
+.lex-card {
+  background:white; border:1px solid var(--border);
+  border-radius:4px; padding:18px 20px;
+  display:flex; gap:14px; align-items:flex-start;
+}
+.lex-code {
+  font-family:'DM Mono',monospace; font-size:13px; font-weight:500;
+  color:white; padding:5px 9px; border-radius:3px; white-space:nowrap;
+  flex-shrink:0; line-height:1.2; margin-top:2px;
+}
+.lex-body {}
+.lex-term { font-size:14px; font-weight:700; letter-spacing:-.01em; margin-bottom:4px; }
+.lex-def { font-size:12px; font-weight:300; color:#4a4540; line-height:1.6; }
+.lex-def em { font-style:italic; color:var(--muted); }
+.lex-example {
+  margin-top:7px; font-family:'DM Mono',monospace; font-size:10px;
+  color:var(--muted); background:var(--cream); padding:5px 8px; border-radius:2px;
+  line-height:1.5;
+}
+
+@media (max-width:900px) {
+  header { padding:24px 20px 20px; }
+  .alerts { padding:10px 20px; }
+  .tabs { padding:0 20px; }
+  .main { padding:0 12px 40px; }
+  .week-row { grid-template-columns: 60px repeat(4,1fr) 80px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Plan d'entraînement · David</div>
+  <h1>Marathon du Vignoble<br><em>21 juin 2026</em></h1>
+  <div class="header-meta">
+    <div class="meta-item"><span class="meta-label">Référence</span><span class="meta-value">Semi Vignoble — 4h40</span></div>
+    <div class="meta-item"><span class="meta-label">Séances course</span><span class="meta-value">Mar · Jeu · Sam</span></div>
+    <div class="meta-item"><span class="meta-label">Vélo</span><span class="meta-value">2–3×/sem (route, VTT ou appartement)</span></div>
+    <div class="meta-item"><span class="meta-label">Renfo</span><span class="meta-value">15–20 min 3×/sem</span></div>
+    <div class="meta-item"><span class="meta-label">Objectif</span><span class="meta-value">Finir sans souffrir</span></div>
+    <div class="meta-item"><span class="meta-label">Parcours</span><span class="meta-value">389m D+ · Barrière 6h30</span></div>
+    <div class="meta-item"><span class="meta-label">Estimation arrivée</span><span class="meta-value">5h50 – 6h20 (389m D+)</span></div>
+  </div>
+</header>
+
+<div class="alerts">
+  <div class="alert-badge injury">⚠ Antécédents genou/tendon : progression ≤ 10%/sem, décharges strictes</div>
+  <div class="alert-badge couple">♥ Samedi : solo ou à deux — allure libre si ensemble</div>
+  <div class="alert-badge" style="background:rgba(26,107,138,.2);color:#80c8e8;border:1px solid rgba(26,107,138,.3);">⛰ 389m D+ · 3 zones : km 0–15 plat / km 17–25 deux vraies bosses / km 28–38 bosses répétées</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('plan',this)">Plan d'entraînement</button>
+  <button class="tab-btn" onclick="switchTab('charge',this)">Graphique de charge</button>
+  <button class="tab-btn" onclick="switchTab('nutrition',this)">Nutrition & Hydratation</button>
+  <button class="tab-btn" onclick="switchTab('lexique',this)">Lexique</button>
+  <button class="tab-btn" onclick="switchTab('planb',this)">Si vous manquez des séances</button>
+</div>
+
+<!-- TAB 1 : PLAN -->
+<div id="tab-plan" class="tab-pane active">
+<div class="main">
+  <div class="controls">
+    <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-right:4px;">Afficher :</span>
+    <button class="filter-btn active" onclick="filterWeeks('all',this)">Tout</button>
+    <button class="filter-btn" onclick="filterWeeks('bloc1',this)">Bloc 1</button>
+    <button class="filter-btn" onclick="filterWeeks('bloc2',this)">Bloc 2</button>
+    <button class="filter-btn" onclick="filterWeeks('bloc3',this)">Bloc 3</button>
+    <span class="week-counter" id="weekCounter">12 semaines</span>
+  </div>
+  <div id="plan-container"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div>Course EF</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--rust)"></div>Long</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--couple)"></div>Option couple</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--velo)"></div>Vélo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--renfo)"></div>Renforcement</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Décharge</div>
+  </div>
+  <div class="notes-section">
+    <div class="notes-title">Notes de prescription</div>
+    <div class="notes-grid">
+      <div class="note-block">
+        <h4>Allures & sensations de référence</h4>
+        <ul>
+          <li>EF solo : 9'00–9'45 /km · RPE 2–3 · tu chantes</li>
+          <li>EF couple : allure épouse · RPE 1–2 · tu ris</li>
+          <li>Long : 9'30–10'30 /km · RPE 3 · tu parles par phrases</li>
+          <li>Race-pace : 9'45–10'15 /km · RPE 4 · phrases courtes</li>
+          <li>Récup/marche : &gt; 11'/km · RPE 1</li>
+        </ul>
+      </div>
+      <div class="note-block">
+        <h4>Stratégie par zone — profil analysé</h4>
+        <ul>
+          <li><strong>Km 0–15</strong> : plat ~160–180m · RPE 2–3 · ~10'20/km · danger : partir trop vite</li>
+          <li><strong>Km 17–25</strong> : 2 vraies bosses (pic ~230m) · ralentir fort · RPE 3 tenu = ~12–13'/km en montée</li>
+          <li><strong>Km 28–38</strong> : bosses courtes répétées sur jambes fatiguées · RPE 3 max · marcher si nécessaire</li>
+          <li><strong>Descentes</strong> : récupération passive sur tout le parcours — ne jamais relancer</li>
+          <li>Foam roller quadriceps après chaque sortie avec relief</li>
+          <li>Barrière 6h30 à l'arrivée uniquement · marge estimée 5–35 min</li>
+        </ul>
+      </div>
+      <div class="note-block">
+        <h4>Antécédents — règles non négociables</h4>
+        <ul>
+          <li>10 min marche avant chaque sortie course</li>
+          <li>Pas de progression long si douleur &gt; 3/10</li>
+          <li>Foam roller membres inférieurs post-long</li>
+          <li>Ne jamais rattraper une semaine sautée</li>
+          <li>Douleur 2 séances consécutives → pause 3 j + avis</li>
+        </ul>
+      </div>
+      <div class="note-block">
+        <h4>Vélo — principes</h4>
+        <ul>
+          <li>Sortie RPE 2–3 : entretien aérobie sans impact articulaire</li>
+          <li>45–90 min selon la semaine — tout support adapté</li>
+          <li>Pas de vélo exigeant le lendemain d'un long</li>
+          <li>Semaines décharge : vélo réduit ou supprimé</li>
+        </ul>
+      </div>
+      <div class="note-block">
+        <h4>Renfo — circuit karatéka</h4>
+        <ul>
+          <li>15–20 min · 3 fois/sem (lundi, mercredi, vendredi)</li>
+          <li>Squat, fente bulgare, mollet sur marche, gainage</li>
+          <li>Pont fessier unilatéral (prévention genou)</li>
+          <li>Semaines décharge : 1 seule séance, 10 min</li>
+          <li>Semaine 11 (pré-course) : renfo suspendu</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TAB 2 : CHARGE -->
+<div id="tab-charge" class="tab-pane">
+<div class="main">
+  <div class="chart-section">
+    <div class="chart-title">Volume course hebdomadaire & ACWR</div>
+    <div class="chart-container">
+      <canvas id="chargeChart" height="280"></canvas>
+      <div class="chart-legend">
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:rgba(74,103,65,.7);height:12px;border-radius:2px;"></div>
+          Volume course (km)
+        </div>
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--rust);height:2px;position:relative;">
+            <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:var(--rust);display:block;"></span>
+          </div>
+          ACWR (ratio charge aiguë/chronique)
+        </div>
+        <div class="chart-legend-item">
+          <div style="width:24px;height:12px;background:rgba(200,134,10,.2);border-radius:1px;"></div>
+          Zone vigilance (ACWR 1.15–1.30)
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Volume total par semaine (course + vélo estimé)</div>
+      <canvas id="totalChart" height="200"></canvas>
+    </div>
+    <div class="chart-container" style="padding:20px 24px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Lecture de l'ACWR</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="background:var(--sage-light);border-radius:3px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--sage);">0.8 – 1.15</div>
+          <div style="font-size:12px;font-weight:700;margin:4px 0;color:var(--sage);">Zone optimale</div>
+          <div style="font-size:11px;font-weight:300;color:#3a5a38;line-height:1.5;">Charge de la semaine cohérente avec la base récente. Risque blessure minimal.</div>
+        </div>
+        <div style="background:var(--amber-light);border-radius:3px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--amber);">1.15 – 1.30</div>
+          <div style="font-size:12px;font-weight:700;margin:4px 0;color:var(--amber);">Vigilance</div>
+          <div style="font-size:11px;font-weight:300;color:#6a4400;line-height:1.5;">Progression rapide. Acceptable si isolé. Surveiller les signaux du corps.</div>
+        </div>
+        <div style="background:var(--rust-light);border-radius:3px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--rust);">&gt; 1.30</div>
+          <div style="font-size:12px;font-weight:700;margin:4px 0;color:var(--rust);">Zone rouge</div>
+          <div style="font-size:11px;font-weight:300;color:#7a2a0a;line-height:1.5;">Surcharge. Risque blessure élevé. Réduire le volume immédiatement.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TAB 3 : NUTRITION -->
+<div id="tab-nutrition" class="tab-pane">
+<div class="main">
+  <div class="nutrition-grid">
+
+    <div class="nutri-card">
+      <div class="nutri-card-header">
+        <div class="nutri-icon">🏃</div>
+        <div><div class="nutri-title">Séances courtes</div><div class="nutri-subtitle">Mardi/Jeudi — &lt; 60 min</div></div>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Avant (1–2h)</div>
+        <p>Repas léger facile à digérer — toast, banane, yaourt. Pas de fibre excessive ni de graisses. <strong>500 ml d'eau</strong> dans les 2h précédant la séance.</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Pendant</div>
+        <p>En dessous de 60 min à allure EF : <strong>eau seule suffisante</strong>. Une gorgée toutes les 15–20 min si chaud. Pas de gel nécessaire.</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Après</div>
+        <p>Dans les <strong>30 min</strong> : 250–300 ml d'eau + une source de glucides rapides (fruit, compote). Dans les 2h : repas normal avec protéines.</p>
+      </div>
+    </div>
+
+    <div class="nutri-card">
+      <div class="nutri-card-header">
+        <div class="nutri-icon">📏</div>
+        <div><div class="nutri-title">Sorties longues</div><div class="nutri-subtitle">Samedi — &gt; 90 min</div></div>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Avant (2–3h)</div>
+        <p>Repas solide mais digeste : <strong>riz + poulet/oeuf, pâtes avec peu de sauce</strong>, pain. Éviter les fibres (légumes crus, légumineuses). Hydratation : 750 ml.</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Pendant — règle des 20 min</div>
+        <p>Boire <strong>une gorgée toutes les 20 min minimum</strong>, même sans soif — l'été, viser 500–700 ml/h. À partir de 90 min : <strong>gel ou pâte de fruit toutes les 45 min</strong> (30–40g de glucides/h). Commencer dès 60 min pour anticiper la déplétion.</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Après (fenêtre anabolique)</div>
+        <p>Dans les <strong>20–30 min</strong> : boisson de récupération ou lait chocolat + banane. Dans les 2h : repas complet glucides + protéines (20–30g). Peser avant/après pour évaluer les pertes hydriques si chaleur.</p>
+      </div>
+      <div class="nutri-alert">⚠ Utiliser les sorties longues pour tester les gels/boissons prévus le jour du marathon. Ne rien changer le jour J.</div>
+    </div>
+
+    <div class="nutri-card">
+      <div class="nutri-card-header">
+        <div class="nutri-icon">📅</div>
+        <div><div class="nutri-title">J-2 et J-1</div><div class="nutri-subtitle">Charge glucidique</div></div>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">J-2 (vendredi)</div>
+        <p>Début de la <strong>surcharge glucidique légère</strong> : augmenter les féculents à chaque repas (riz, pâtes, pain). Réduire les graisses et les fibres. Bien s'hydrater (2–2.5 L).</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">J-1 (samedi)</div>
+        <p>Repas du soir : <strong>pâtes, riz ou pomme de terre</strong> avec une source de protéines maigres. Pas de nouveauté, pas de restaurant. Couper l'alcool. Boire régulièrement jusqu'au soir (viser urine claire).</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Avant le coucher</div>
+        <p>Pas de repas lourd tard. Préparer son matériel, ses gels, sa boisson. Dernière vérification météo pour adapter l'hydratation le lendemain.</p>
+      </div>
+    </div>
+
+    <div class="nutri-card">
+      <div class="nutri-card-header">
+        <div class="nutri-icon">🏁</div>
+        <div><div class="nutri-title">Jour J — Marathon</div><div class="nutri-subtitle">21 juin 2026</div></div>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Matin (3h avant départ)</div>
+        <p>Petit-déjeuner testé à l'entraînement : <strong>pain/céréales + confiture + banane + café si habituel</strong>. Aucune improvisation. 500 ml d'eau sur les 2h avant le départ.</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Sur le parcours</div>
+        <p><strong>Boire à chaque ravitaillement</strong> sans attendre la soif — erreur classique du finisseur. Prendre un gel toutes les 45 min à partir du km 10. Si gels testés = ok, s'y tenir. Si bananes/oranges disponibles et testées : accepter.</p>
+      </div>
+      <div class="nutri-item">
+        <div class="nutri-item-label">Le mur du km 30–35</div>
+        <p>La déplétion glycogénique est réelle. La prévenir par une stratégie glucidique régulière en amont vaut mieux que de chercher à la compenser. Si les jambes durcissent : <strong>réduire l'allure, maintenir l'hydratation, ne pas s'arrêter</strong>.</p>
+      </div>
+      <div class="nutri-alert">Objectif hydratation sur 5h50–6h25 : 2.5–3 L au total. Éviter la surhydratation (hyponatrémie fréquente à allure lente sur longue durée — ne pas dépasser 500–700 ml/h).</div>
+    </div>
+
+    <div class="nutri-card" style="grid-column:1/-1;">
+      <div class="nutri-card-header">
+        <div class="nutri-icon">🔋</div>
+        <div><div class="nutri-title">Nutrition au quotidien</div><div class="nutri-subtitle">Pendant les 12 semaines</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div class="nutri-item" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+          <div class="nutri-item-label">Glucides — carburant</div>
+          <p>Ne pas réduire les féculents pendant la préparation. Le corps en a besoin pour récupérer entre les séances. <strong>Riz, pâtes, pommes de terre, pain complet</strong> à chaque repas principal.</p>
+        </div>
+        <div class="nutri-item" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+          <div class="nutri-item-label">Protéines — reconstruction</div>
+          <p>Minimum <strong>1.4–1.6 g/kg/jour</strong> en période de charge. Viande, poisson, oeufs, légumineuses. Importance maximale dans les 30 min post-long. Ancien karatéka : base probablement déjà bonne.</p>
+        </div>
+        <div class="nutri-item" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+          <div class="nutri-item-label">Hydratation de fond</div>
+          <p>Viser <strong>1.5–2 L d'eau/jour</strong> hors séances. Urine jaune pâle = bien hydraté. Jours de vélo ou forte chaleur : +500 ml. Café et thé comptent partiellement.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+
+<!-- TAB 4 : LEXIQUE -->
+<div id="tab-lexique" class="tab-pane">
+<div class="main">
+<div class="lexique-grid">
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--sage)">EF</div>
+    <div class="lex-body">
+      <div class="lex-term">Endurance Fondamentale</div>
+      <div class="lex-def">L'allure de base de tout entraînement aérobie. C'est l'intensité à laquelle vous pouvez tenir une conversation complète sans être essoufflé. Ce n'est pas une allure "facile" au sens paresseux — c'est l'allure qui développe le moteur aérobie sans épuiser les réserves. <em>La majorité des coureurs vont naturellement trop vite en EF.</em></div>
+      <div class="lex-example">Sur ce plan : 9'00–9'45/km · RPE 2–3 · vous pouvez parler normalement ou chanter</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--rust)">RPE</div>
+    <div class="lex-body">
+      <div class="lex-term">Rate of Perceived Exertion — Effort Perçu</div>
+      <div class="lex-def">Échelle de 1 à 5 qui mesure comment vous ressentez l'effort, indépendamment de votre allure. C'est le meilleur indicateur sur un parcours vallonné, par forte chaleur, ou quand la fatigue s'accumule — car l'allure devient non pertinente dans ces contextes.</div>
+      <div class="lex-example">RPE 1 = vous flânez · RPE 2 = vous chantez · RPE 3 = phrases courtes · RPE 4 = mots seulement · RPE 5 = vous soufflez</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--amber)">ACWR</div>
+    <div class="lex-body">
+      <div class="lex-term">Acute:Chronic Workload Ratio — Ratio de charge</div>
+      <div class="lex-def">Rapport entre le volume de la semaine en cours (charge aiguë) et la moyenne des 3 semaines précédentes (charge chronique). Il mesure si vous augmentez la charge trop vite par rapport à ce que votre corps a l'habitude de gérer. <em>Un ACWR élevé = risque blessure augmenté.</em></div>
+      <div class="lex-example">0.8–1.15 = zone optimale · 1.15–1.30 = vigilance · &gt;1.30 = zone rouge</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--ink)">SL</div>
+    <div class="lex-body">
+      <div class="lex-term">Sortie Longue</div>
+      <div class="lex-def">La séance fondatrice du marathon. Elle habitue les muscles, les tendons et le système nerveux à soutenir un effort prolongé, et entraîne le corps à utiliser les graisses comme carburant. Elle se fait toujours à allure EF — jamais plus vite. <em>La fatigue du lendemain est normale et attendue.</em></div>
+      <div class="lex-example">Sur ce plan : samedi · de 14 km (S1) à 29–30 km (S9) · progression de ~2 km/semaine</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--couple)">RP</div>
+    <div class="lex-body">
+      <div class="lex-term">Race-Pace — Allure cible de course</div>
+      <div class="lex-def">L'allure à laquelle vous visez de courir le marathon, ou les segments plats du parcours. Sur ce plan, elle est introduite par courts blocs en fin de sorties longues, pour que le corps reconnaisse cette sensation sans s'y épuiser. <em>Le race-pace n'est pas une allure d'entraînement habituelle — c'est un outil de répétition.</em></div>
+      <div class="lex-example">Sur ce plan : ~10'20–10'30/km sur plat · RPE 4 · phrases très courtes</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--velo)">D+</div>
+    <div class="lex-body">
+      <div class="lex-term">Dénivelé positif</div>
+      <div class="lex-def">Cumul total des mètres de montée sur un parcours. Un marathon avec 389m D+ demande plus d'énergie qu'un marathon plat, même si les bosses semblent petites. Sur le Marathon des Vignobles d'Alsace, le D+ est réparti en petites bosses répétées (10–20m), ce qui fatigue les quadriceps progressivement sans signal d'alarme.</div>
+      <div class="lex-example">Marathon des Vignobles : 389m D+ · altitude entre 162m et 235m · profil ondulé</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--amber)">↓</div>
+    <div class="lex-body">
+      <div class="lex-term">Semaine de décharge</div>
+      <div class="lex-def">Semaine avec volume réduit de 30 à 40%, placée délibérément après un bloc de travail. Ce n'est pas une semaine de paresse — c'est pendant ces semaines que le corps consolide les adaptations. <em>Compenser une décharge en ajoutant des séances annule son effet.</em> Sur ce plan : S4, S8, S11.</div>
+      <div class="lex-example">S4 : 16 km (vs 27 km la semaine précédente) · 2 séances course seulement</div>
+    </div>
+  </div>
+
+  <div class="lex-card">
+    <div class="lex-code" style="background:var(--renfo)">FR</div>
+    <div class="lex-body">
+      <div class="lex-term">Foam Roller — Rouleau de massage</div>
+      <div class="lex-def">Outil de récupération utilisé après les séances longues ou avec dénivelé. On fait rouler le poids du corps dessus pour relâcher les tensions musculaires, notamment dans les quadriceps, les mollets et la face externe des cuisses. <em>Effet préventif sur les douleurs de genou en cas d'entraînement répété.</em></div>
+      <div class="lex-example">Post-long : 5–10 min sur mollets, quadriceps, face externe de cuisse · 30 sec/zone</div>
+    </div>
+  </div>
+
+  <div class="lex-card" style="grid-column:1/-1;">
+    <div class="lex-code" style="background:#444;font-size:11px;padding:5px 7px;">ALLURE</div>
+    <div class="lex-body">
+      <div class="lex-term">Allure — min/km</div>
+      <div class="lex-def">Temps mis pour parcourir un kilomètre. Une allure de 10'00/km signifie 10 minutes par kilomètre, soit 6 km/h. Sur un parcours vallonné, l'allure monte (ralentit) en montée et descend en descente — c'est pourquoi le RPE est un meilleur pilote que l'allure sur ce marathon. <em>L'allure est indicative ; la sensation est décisive.</em> Pour convertir : si vous visez 5h50 sur 42 km, cela correspond à 8'17/km en moyenne — mais cette moyenne cache des variations importantes selon les zones du profil.</div>
+      <div class="lex-example">9'00/km = 6.7 km/h · 10'00/km = 6.0 km/h · 10'30/km = 5.7 km/h · 12'00/km = 5.0 km/h</div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+
+<!-- TAB 5 : PLAN B -->
+<div id="tab-planb" class="tab-pane">
+<div class="main" style="padding-top:24px;">
+
+  <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Principe général</div>
+  <div style="background:var(--ink);color:var(--paper);border-radius:4px;padding:20px 24px;margin-bottom:24px;">
+    <p style="font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,240,232,.85);">Ce plan est conçu pour être tenu à 3 séances de course par semaine. Si la vie en décide autrement, voici la règle de survie : <strong style="color:var(--rust)">ne jamais sacrifier le long du samedi</strong>. C'est la seule séance vraiment irremplaçable pour un marathon. Tout le reste est adaptable. Une semaine à 2 séances de course ne compromet pas la préparation. Une semaine sans long, 3 fois de suite, oui.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+    <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Hiérarchie des séances</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--rust-light);border-radius:3px;">
+          <span class="prio-badge prio-1" style="position:relative;bottom:auto;right:auto;flex-shrink:0;">P1</span>
+          <div><div style="font-size:13px;font-weight:700;margin-bottom:3px;">Long du samedi</div><div style="font-size:12px;font-weight:300;color:#5a5550;">Incontournable. Si une seule séance est possible cette semaine, c'est celle-ci. Raccourcir si besoin (–2 km), mais ne pas supprimer.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--amber-light);border-radius:3px;">
+          <span class="prio-badge prio-2" style="position:relative;bottom:auto;right:auto;flex-shrink:0;">P2</span>
+          <div><div style="font-size:13px;font-weight:700;margin-bottom:3px;">EF du jeudi</div><div style="font-size:12px;font-weight:300;color:#5a5550;">Important. Maintient le volume hebdomadaire et la régularité. Peut être raccourci de 10 min si fatigue.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--sage-light);border-radius:3px;">
+          <span class="prio-badge prio-3" style="position:relative;bottom:auto;right:auto;flex-shrink:0;">P3</span>
+          <div><div style="font-size:13px;font-weight:700;margin-bottom:3px;">EF du mardi + vélo + renfo</div><div style="font-size:12px;font-weight:300;color:#5a5550;">Bénéfique mais optionnel. En semaine chargée : supprimer le renfo en premier, puis le vélo, puis le mardi course.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Scénarios fréquents</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="padding:10px;background:var(--cream);border-radius:3px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">Semaine très chargée (travail, voyage)</div>
+          <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.6;">Supprimer mardi + renfo + vélo. Garder jeudi (réduit à 25 min) + long samedi. C'est une semaine à 2 séances — acceptable, ne pas compenser.</div>
+        </div>
+        <div style="padding:10px;background:var(--cream);border-radius:3px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">Fatigue ou légère douleur</div>
+          <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.6;">Remplacer le long par une sortie à –30% de la distance prévue. Supprimer mardi et renfo. Si douleur &gt; 3/10 : pause 3 jours, puis reprendre à la semaine précédente (pas rattraper).</div>
+        </div>
+        <div style="padding:10px;background:var(--cream);border-radius:3px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">Semaine manquée complète</div>
+          <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.6;">Ne pas rattraper. Reprendre la semaine suivante comme prévu, en acceptant le manque. Une semaine perdue sur 12 ne compromet pas le marathon.</div>
+        </div>
+        <div style="padding:10px;background:var(--cream);border-radius:3px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">Long samedi impossible (météo, agenda)</div>
+          <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.6;">Décaler au dimanche uniquement. Si impossible dimanche aussi : faire une sortie longue réduite (–4 km) en semaine. Pas d'autre substitut.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:16px;background:white;border:1px solid var(--border);border-radius:4px;padding:20px;">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Adaptations par bloc</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+      <div style="padding:14px;background:var(--cream);border-radius:3px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink);">Bloc 1 — S1 à S4</div>
+        <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.65;">Phase de construction : la régularité prime sur le volume. <strong>Minimum viable : 2 séances/sem dont le long.</strong> Le renfo et le vélo sont entièrement optionnels si vous partez de zéro. Mieux vaut 3 séances légères que 2 intenses.</div>
+      </div>
+      <div style="padding:14px;background:var(--cream);border-radius:3px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink);">Bloc 2 — S5 à S9</div>
+        <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.65;">Phase de développement : les longs sont critiques. <strong>Ne pas raccourcir les longs de S7 (26 km) et S9 (29–30 km).</strong> En cas de contrainte, c'est le mardi et le vélo qu'on coupe — pas le samedi. Le renfo peut descendre à 2 séances/sem.</div>
+      </div>
+      <div style="padding:14px;background:var(--cream);border-radius:3px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink);">Bloc 3 — S10 à S11</div>
+        <div style="font-size:12px;font-weight:300;color:#4a4540;line-height:1.65;">Phase d'affûtage : volume en baisse naturellement. <strong>S11 est intouchable — ne rien ajouter.</strong> Si vous avez raté des semaines en bloc 2, ne cherchez pas à compenser ici. Arriver reposé vaut mieux qu'arriver chargé.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-header">
+      <div class="modal-day" id="mDay"></div>
+      <div class="modal-title" id="mTitle"></div>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">Fermer</button>
+  </div>
+</div>
+
+<script>
+/* ─── DATA ─── */
+const BLOCS = [
+ {
+  id:'bloc1', name:'Bloc 1 — Construction',
+  desc:'Rebâtir la régularité, habituer les structures à la charge',
+  weeks:[
+   {
+    num:1, type:'normal', dates:'6–12 avr.', volume:22,
+    sessions:[
+     {
+      col:0, day:'Lundi', type:'renfo', label:'Renfo 15 min',
+      details:'Squat × 15, fente × 10/côté, gainage 3 × 30 sec, pont fessier × 15\nEnchaîner sans pause longue',
+      allure:'', rpe:null,
+      avant:'Aucun échauffement nécessaire — démarrer directement.',
+      pendant:'Contrôle du mouvement prioritaire sur la vitesse. Genou au-dessus du pied.',
+      apres:'Étirements quadriceps et mollets, 3 min.'
+     },
+     {
+      col:1, day:'Mardi', type:'ef', label:'EF Fondation',
+      details:'25 min en continu\n10 min marche d\'échauffement avant',
+      allure:'9\'15–9\'45 /km', rpe:2,
+      rpeDesc:'Tu peux chanter. Foulée souple, épaules basses.',
+      avant:'Marche rapide 10 min. Mobilisation chevilles (rotation). Hydratation : 300 ml avant.',
+      pendant:'Aucun objectif de distance — juste la durée. Ralentir ou marcher si essouflement.',
+      apres:'Hydratation immédiate (300 ml). Foam roller mollets si tensions. C\'est normal de ne pas sentir d\'effort.'
+     },
+     {
+      col:2, day:'Mercredi', type:'velo', label:'Vélo 45 min',
+      details:'Sortie légère · RPE 2 — pédalage facile\nDurée > distance',
+      allure:'', rpe:2,
+      avant:'Pas d\'objectif de vitesse ni de distance.',
+      pendant:'Restez en récupération active — ce n\'est pas une sortie de performance.',
+      apres:'Étirer les quadriceps et les hanches post-vélo.'
+     },
+     {
+      col:3, day:'Jeudi', type:'ef', label:'EF + éducatifs',
+      details:'30 min + 10 min éducatifs\n(montées genoux, talons-fesses, pas chassés)',
+      allure:'9\'00–9\'30 /km', rpe:2,
+      rpeDesc:'Tu parles sans effort en phrases normales.',
+      avant:'Marche 10 min. Les éducatifs se font à faible allure — ils travaillent la technique, pas le souffle.',
+      pendant:'Éducatifs en fin de séance, pas au début. Concentration sur la pose du pied.',
+      apres:'Hydratation. Mobilisation des chevilles si séances successives.'
+     },
+     {
+      col:4, day:'Vendredi', type:'renfo', label:'Renfo 15 min',
+      details:'Mollet debout sur marche × 20, fente bulgare × 10/côté\nGainage latéral 2 × 30 sec/côté',
+      allure:'', rpe:null,
+      avant:'Court échauffement articulaire (30 sec).',
+      pendant:'Travailler l\'excentrique sur le mollet : descente lente (3 sec).',
+      apres:'Massage léger mollets si tensions.'
+     },
+     {
+      col:5, day:'Samedi', type:'long', label:'Long 14 km',
+      details:'Sortie de (re)découverte\nSolo ou à deux — pas d\'objectif chrono',
+      allure:'9\'30–10\'15 /km', rpe:3, couple:true,
+      rpeDesc:'Tu parles par phrases courtes. Pas de douleur, pas de souffle court.',
+      avant:'Petit-déjeuner 2–3h avant. 500 ml d\'eau le matin. Marche 10 min avant de courir.',
+      pendant:'Boire une gorgée toutes les 20 min. Gérer les premières montées en marchant si besoin.',
+      apres:'Récupération prioritaire : hydratation (500 ml), protéines dans les 30 min. Foam roller IT/mollets si sensation de raideur.'
+     },
+     {col:6, day:'Dimanche', type:'repos', label:'Repos', details:'', allure:'', rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:2, type:'normal', dates:'13–19 avr.', volume:24,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 15 min',details:'Squat sauté × 10, fente × 12/côté\nPont fessier unilatéral × 12/côté, gainage 3×30s',allure:'',rpe:null,avant:'Mobilisation hanches.',pendant:'Contrôle atterrissage sur squat sauté — genou fléchi, pied à plat.',apres:'Étirements quadriceps.'},
+     {col:1,day:'Mardi',type:'ef',label:'EF 30 min',details:'30 min continu\nSentir la foulée, pas la montre',allure:'9\'00–9\'45 /km',rpe:2,rpeDesc:'Tu peux chanter ou parler librement.',avant:'Marche 10 min. 300 ml eau.',pendant:'Pas de chrono — profiter du parcours.',apres:'Hydratation 300 ml. Pas d\'étirements forcés.'},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 50 min',details:'Sortie légère à modérée · RPE 2\nDurée guidée, pas distance',allure:'',rpe:2,avant:'',pendant:'Rester en zone aérobie — tu peux parler.',apres:''},
+     {col:3,day:'Jeudi',type:'ef',label:'EF 35 min',details:'35 min — solo ou à deux si occasion\nAllure conversationnelle',allure:'9\'00–9\'45 /km',rpe:2,rpeDesc:'Tu parles normalement. Allure libre si couple.',avant:'Marche 10 min.',pendant:'Pas de compétition — absorber l\'allure du partenaire si sortie commune.',apres:'Hydratation.'},
+     {col:4,day:'Vendredi',type:'renfo',label:'Renfo 15 min',details:'Step-up sur marche × 15/côté\nMollet excentrique × 15, gainage frontal 3 × 35 sec',allure:'',rpe:null,avant:'',pendant:'Descente lente sur mollet — 3 secondes.',apres:'Étirements mollets.'},
+     {col:5,day:'Samedi',type:'long',label:'Long 16 km',details:'16 km progressifs\n12 km EF + 4 km légèrement plus vif',allure:'9\'30–10\'00 /km',rpe:3,couple:true,rpeDesc:'Phrases courtes sur les 4 derniers km.',avant:'Repas 2–3h avant. 500 ml eau. Tester une première fois une prise de gel ou de pâte de fruit à mi-parcours.',pendant:'Tester l\'hydratation toutes les 20 min. Gérer l\'effort sur la première moitié.',apres:'Récupération complète — repos dimanche.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:3, type:'normal', dates:'20–26 avr.', volume:27,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 20 min',details:'Circuit complet : squat, fente bulgare, mollet\nGainage latéral + pont fessier unilatéral',allure:'',rpe:null,avant:'',pendant:'Maintenir la technique malgré la fatigue.',apres:''},
+     {col:1,day:'Mardi',type:'ef',label:'EF 35 min + blocs',details:'35 min — introduire 2×3 min légèrement au-dessus EF\nRécup 3 min marche entre',allure:'8\'45–9\'15 /km',rpe:3,rpeDesc:'Sur les 3 min vifs : phrases courtes. Pas plus.',avant:'Marche 10 min + 2 min de foulées progressives.',pendant:'Les blocs ne sont pas du sprint — juste "un peu plus rapide". Revenir à l\'EF après.',apres:'Hydratation. Étirements légers si jambes lourdes.'},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 55 min',details:'Sortie avec quelques accélérations courtes (3×1 min)\nReste en RPE 2',allure:'',rpe:2,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'ef',label:'EF 40 min',details:'40 min continu\nRelâcher épaules, respiration nasale si possible',allure:'9\'00–9\'30 /km',rpe:2,rpeDesc:'Tu parles et tu respires par le nez confortablement.',avant:'Marche 10 min.',pendant:'Respiration nasale en option — ne pas forcer si difficile.',apres:''},
+     {col:4,day:'Vendredi',type:'renfo',label:'Renfo 20 min',details:'Squat sauté × 12, fente marche × 10/côté\nMollet unilatéral × 12/côté, gainage 4×30s',allure:'',rpe:null,avant:'',pendant:'',apres:'Étirements complets post-renfo.'},
+     {col:5,day:'Samedi',type:'long',label:'Long 18 km',details:'18 km — dernier tiers légèrement accéléré\nTester hydratation + gel à 60 min',allure:'9\'30–10\'00 /km',rpe:3,couple:true,rpeDesc:'EF les 2/3, phrases courtes sur le dernier tiers.',avant:'Repas 3h avant. 600 ml eau. Emporter gel ou pâte de fruit.',pendant:'Ravitaillement à 60 min (gel + eau). Contrôler l\'allure sur le dernier tiers — pas de finish sprint.',apres:'Récupération : 500 ml eau/électrolytes, repas complet dans les 2h. Foam roller.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:4, type:'decharge', dates:'27 avr.–3 mai', volume:16,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo réduit 10 min',details:'Mobilité uniquement : rotation hanches, étirements mollets\nPas de charge cette semaine',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'decharge',label:'Récup 25 min',details:'25 min très léger\nMarche / trot alternés si besoin',allure:'> 10\'00 /km',rpe:1,rpeDesc:'Tu chantes. Pas d\'effort perçu.',avant:'Marche 10 min.',pendant:'Pas de montre — durée uniquement.',apres:'Hydratation.'},
+     {col:2,day:'Mercredi',type:'repos',label:'Repos',details:'Vélo suspendu cette semaine',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:4,day:'Vendredi',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'decharge',label:'Décharge 11 km',details:'11 km tranquilles\nObserver les sensations — bilan bloc 1',allure:'9\'45–10\'30 /km',rpe:2,couple:true,rpeDesc:'Tu parles librement. Aucune pression.',avant:'',pendant:'Bilan personnel : douleurs ? Fatigue ? Motivation ?',apres:'Récupération légère.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   }
+  ]
+ },
+ {
+  id:'bloc2', name:'Bloc 2 — Développement',
+  desc:'Montée en volume, franchir les distances symboliques',
+  weeks:[
+   {
+    num:5, type:'normal', dates:'4–10 mai', volume:30,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 20 min',details:'Circuit complet — augmenter légèrement les charges ou répétitions',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'ef',label:'EF 40 min',details:'40 min — tester un parcours vallonné léger',allure:'9\'00–9\'30 /km',rpe:2,rpeDesc:'Tu parles normalement même en côte légère.',avant:'Marche 10 min.',pendant:'En côte : ralentir pour maintenir le RPE, pas l\'allure.',apres:''},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 60 min',details:'Sortie endurance · RPE 2–3\nVélo d\'endurance active',allure:'',rpe:2,avant:'',pendant:'',apres:'Étirements hanches.'},
+     {col:3,day:'Jeudi',type:'ef',label:'EF 50 min',details:'50 min — solo ou à deux si possible\nSi ensemble, allure épouse — sans négocier',allure:'9\'00–9\'45 /km',rpe:2,rpeDesc:'Conversation fluide. L\'épouse donne le rythme si couple.',avant:'Marche 10 min.',pendant:'Ne pas accélérer en couple pour compenser.',apres:''},
+     {col:4,day:'Vendredi',type:'renfo',label:'Renfo 20 min',details:'Mollet excentrique, pont bulgare, gainage\nAjouter rotation du tronc (karaté-base)',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'long',label:'Long 20 km',details:'20 km — franchissement symbolique\nAllure EF stricte, surtout en fin',allure:'9\'45–10\'15 /km',rpe:3,couple:true,rpeDesc:'Phrases courtes. Jamais essoufflé. Gérer la fin.',avant:'Repas 3h avant. 600 ml eau. Emporter 2 gels.',pendant:'Gel à 60 min et 90 min + eau. Ne pas accélérer en milieu de sortie.',apres:'Fenêtre récup 20 min : boisson + glucides rapides. Repas dans les 2h.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:6, type:'normal', dates:'11–17 mai', volume:33,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 20 min',details:'Circuit identique S5 — augmenter volume (séries)',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'ef',label:'EF 45 min',details:'45 min + 5 min accélération progressive en fin',allure:'9\'00–9\'15 /km',rpe:2,rpeDesc:'Tu parles normalement. Légère montée sur les 5 min finales.',avant:'Marche 10 min.',pendant:'Pas de sprint final — progression douce sur les dernières minutes.',apres:''},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 70 min',details:'Sortie active · RPE 2–3\nSentir la progression cardio sans impact articulaire',allure:'',rpe:3,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'ef',label:'EF + tempo court',details:'35 min EF + 2×5 min sous allure marathon\nRécup 3 min marche entre blocs',allure:'8\'30–9\'00 /km (blocs)',rpe:4,rpeDesc:'Sur les blocs : phrases très courtes. Pas de sprint.',avant:'Échauffement long — 15 min marche + 10 min EF avant les blocs.',pendant:'Les 2×5 min ne sont pas à fond — "confortablement dur". Récupérer vraiment entre les blocs.',apres:'Hydratation protéinée si sortie intense.'},
+     {col:4,day:'Vendredi',type:'renfo',label:'Renfo 20 min',details:'Circuits course : montées de genoux dynamiques, talons-fesses\nRenfo fonctionnel — lier karaté et course',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'long',label:'Long 23 km',details:'23 km avec relief ondulé si possible (~100m D+)\nTester la règle RPE constant : ralentir en bosse, pas marcher',allure:'9\'45–10\'15 /km',rpe:3,couple:true,rpeDesc:'Phrases courtes sur toute la sortie. Jamais à bout.',avant:'',pendant:'Gels toutes les 45 min dès km 10. Boire à chaque ravito mental.',apres:'Récupération prioritaire. Foam roller quadriceps (descentes). Repos dimanche.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:7, type:'normal', dates:'18–24 mai', volume:36,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 20 min',details:'Maintenir le circuit — ne pas alourdir avant la grosse semaine',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'ef',label:'EF 50 min',details:'50 min — récupération mentale\nPas de chrono, parcours agréable',allure:'9\'15–9\'45 /km',rpe:2,rpeDesc:'Sortie plaisir. Tu n\'es pas là pour performer.',avant:'',pendant:'',apres:''},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 60 min',details:'Sortie récup · RPE 2 uniquement\nJambes légères avant le long',allure:'',rpe:2,avant:'',pendant:'Maintenir RPE 2 — pas de tentations sur le plat.',apres:''},
+     {col:3,day:'Jeudi',type:'ef',label:'EF 55 min',details:'55 min — solo ou à deux\nAllure épouse si couple',allure:'9\'15–9\'45 /km',rpe:2,rpeDesc:'Conversation fluide. Pas de performance.',avant:'',pendant:'',apres:''},
+     {col:4,day:'Vendredi',type:'repos',label:'Repos',details:'Repos pré-long — renfo suspendu',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'long',label:'Long 26 km',details:'26 km avec ~150m D+ ondulé\n22 km RPE-guidé + 4 km race-pace sur segment plat',allure:'9\'30–10\'00 /km',rpe:3,couple:true,rpeDesc:'Race-pace final : phrases très courtes, mais pas dans le rouge.',avant:'Repas 3h avant. Tester la tenue prévue pour le marathon. 750 ml eau. Repérer un parcours avec dénivelé si possible.',pendant:'Plan nutritionnel complet (gels 45 min). Gérer mentalement km 20–22.',apres:'Récupération maximale. Repos dimanche. Sommeil prioritaire.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:8, type:'decharge', dates:'25–31 mai', volume:20,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo réduit 10 min',details:'Mobilité seulement : hanches, mollets, thoracique\nPas de circuit',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'decharge',label:'Récup 30 min',details:'30 min très léger\nSi douleur genou/tendon → repos complet',allure:'> 10\'00 /km',rpe:1,rpeDesc:'Marche rapide ou trot — peu importe.',avant:'',pendant:'',apres:''},
+     {col:2,day:'Mercredi',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:4,day:'Vendredi',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'decharge',label:'Décharge 14 km',details:'14 km sans objectif\nBilan état général (genou, tendon) avant pic',allure:'9\'45–10\'30 /km',rpe:2,couple:true,rpeDesc:'Conversation facile. Bilan physique.',avant:'',pendant:'Observer attentivement toute tension ou douleur.',apres:''},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:9, type:'peak', dates:'1–7 juin', volume:38,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 20 min',details:'Dernier circuit chargé avant l\'affûtage\nMaintenir toutes les séries',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'ef',label:'EF 45 min',details:'45 min — sentir l\'énergie revenir\nSemaine clé : écouter le corps',allure:'9\'00–9\'30 /km',rpe:2,rpeDesc:'Tu te sens "en jambes". C\'est normal après la décharge.',avant:'',pendant:'',apres:''},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 60 min',details:'Sortie active · RPE 2–3\nDernière semaine de charge vélo',allure:'',rpe:3,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'ef',label:'EF 50 min + blocs',details:'50 min + 3×5 min allure marathon\nRécup 3 min marche entre',allure:'9\'45–10\'15 /km (blocs)',rpe:4,rpeDesc:'Sur les blocs : phrases très courtes. Contrôle parfait.',avant:'Échauffement soigné 15 min.',pendant:'Tester mentalement la concentration de course. 3 blocs à allure réelle marathon.',apres:'Récupération complète avant le long.'},
+     {col:4,day:'Vendredi',type:'repos',label:'Repos pré-long',details:'Renfo suspendu — priorité au long de demain',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'long',label:'★ Long 29–30 km',details:'29–30 km avec ~200–250m D+ ondulé\nSimuler le profil course : RPE constant sur les bosses, récup passive en descente',allure:'9\'45–10\'30 /km',rpe:3,couple:true,rpeDesc:'Phrases courtes tout au long. Priorité : finir debout.',avant:'Repas complet 3h avant. Matériel marathon complet (tenue définitive, chaussures de course, gels prévus le J). 750 ml eau. Choisir un parcours avec du relief si disponible.',pendant:'Gel toutes les 45 min dès km 10. Boire toutes les 20 min. Simuler les ravitos du marathon. Marcher si besoin dans les 5 derniers km.',apres:'Fenêtre récup immédiate (20 min) : boisson protéinée ou lait chocolaté + banane. Repos total dimanche. Glace si inflammation.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos total',details:'Récupération prioritaire après le long',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   }
+  ]
+ },
+ {
+  id:'bloc3', name:'Bloc 3 — Affûtage & Course',
+  desc:'Réduction du volume, maintien des sensations, arriver frais',
+  weeks:[
+   {
+    num:10, type:'normal', dates:'8–14 juin', volume:28,
+    sessions:[
+     {col:0,day:'Lundi',type:'renfo',label:'Renfo 15 min allégé',details:'Uniquement mollet excentrique, pont fessier, gainage\nPas de squat chargé',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'ef',label:'EF 40 min',details:'40 min léger\nPas de prise de risque — la forme arrive',allure:'9\'15–9\'45 /km',rpe:2,rpeDesc:'Tu te sens bien. Ne pas accélérer.',avant:'',pendant:'',apres:''},
+     {col:2,day:'Mercredi',type:'velo',label:'Vélo 45 min récup',details:'Sortie récupération · RPE 2 uniquement\nDernières sorties vélo du plan',allure:'',rpe:2,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'ef',label:'EF 45 min',details:'45 min — dernière sortie normale\nSolo ou à deux, très souple',allure:'9\'15–9\'45 /km',rpe:2,rpeDesc:'Conversation facile. Plaisir de courir.',avant:'',pendant:'',apres:''},
+     {col:4,day:'Vendredi',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'long',label:'Long 22 km',details:'22 km — descente progressive entamée\nSensations de fin d\'effort',allure:'9\'30–10\'15 /km',rpe:3,couple:true,rpeDesc:'Phrases courtes. Concentration sur les sensations.',avant:'',pendant:'Plan nutritionnel complet. Dernière simulation marathon.',apres:'Récupération standard.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos',details:'',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   },
+   {
+    num:11, type:'decharge', dates:'15–21 juin', volume:14,
+    sessions:[
+     {col:0,day:'Lundi',type:'repos',label:'Repos',details:'Renfo suspendu toute la semaine',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:1,day:'Mardi',type:'decharge',label:'EF 30 min',details:'30 min léger — dernière sortie un peu longue',allure:'9\'30–10\'00 /km',rpe:2,rpeDesc:'Tu parles facilement. Pas d\'effort.',avant:'',pendant:'',apres:''},
+     {col:2,day:'Mercredi',type:'repos',label:'Repos',details:'Vélo suspendu',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:3,day:'Jeudi',type:'decharge',label:'Activation 20 min',details:'20 min très léger + 4×20 sec foulées vives\nDernière sortie avant la course',allure:'Aisé',rpe:2,rpeDesc:'Tu dois te sentir frais et impatient.',avant:'10 min marche. Tester les chaussures de course définitives.',pendant:'Les 4 foulées vives = sentir la vitesse, pas s\'épuiser.',apres:'Préparation matérielle : gels, dossard, tenue. Repas J-1 planifié.'},
+     {col:4,day:'Vendredi',type:'repos',label:'Repos total',details:'Hydratation, repas, sommeil\nPréparation logistique',allure:'',rpe:null,avant:'',pendant:'',apres:''},
+     {col:5,day:'Samedi',type:'race',label:'🏁 MARATHON — 21 juin',details:'Objectif : finir en moins de 6h30 · barrière arrivée uniquement\nKm 0–15 : plat, RPE 2–3, ~10\'20/km — ne rien forcer\nKm 17–25 : 2 vraies bosses, RPE 3 tenu = ~12–13\'/km en montée\nKm 28–38 : bosses répétées sur fatigue — gérer, pas conquérir',allure:'Km 0–15 : ~10\'20/km · Km 17–25 bosses : RPE 3 (12–13\'/km) · Km 28–38 : RPE 3 max → 5h50–6h25',rpe:4,rpeDesc:'Km 0–15 : RPE 2–3. Km 17–25 bosses : RPE 3 tenu (ralentir fort si nécessaire). Km 28–38 : RPE 3 max sur bosses. Km 38–42 : RPE 4 toléré.',avant:'Petit-déj testé 3h avant. Vérifier les points de coupure intermédiaires sur le site de la course. 10 min marche avant le départ. Gel au km 0.',pendant:'STRATÉGIE PAR ZONE. Km 0–15 plat : tenir RPE 2–3 malgré la tentation d\'accélérer — c\'est ici que la course se gagne ou se perd. Km 17–25 vraies bosses : ralentir franchement (12–13\'/km acceptable), ne pas défendre l\'allure. Descentes km 17–25 : récupération passive, petites foulées. Km 28–38 bosses répétées : mode économie — RPE 3 max, marcher si nécessaire sans hésitation. Km 38–42 : donner ce qui reste. Boire à chaque ravito. Gel toutes les 45 min dès km 10.',apres:'Félicitations. Médaille. Protéines dans l\'heure. Glace sur les jambes si possible.'},
+     {col:6,day:'Dimanche',type:'repos',label:'Repos total',details:'Repos actif : marche légère\nFélicitations !',allure:'',rpe:null,avant:'',pendant:'',apres:''}
+    ]
+   }
+  ]
+ }
+];
+
+const MAX_VOL = 42;
+const RPE_LABELS = ['','Effort nul','Très léger','Modéré','Soutenu','Dur'];
+const RPE_VERB = ['','Tu chantes','Tu parles librement','Phrases courtes','Mots seulement','Tu souffles'];
+const RPE_CSS = ['','rpe-1','rpe-1','rpe-2','rpe-3','rpe-4'];
+const DAYS_SHORT = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+
+/* ACWR */
+function getAllWeeks(){return BLOCS.flatMap(b=>b.weeks);}
+function getAcwr(weekNum){
+  const all=getAllWeeks();
+  const idx=all.findIndex(w=>w.num===weekNum);
+  if(idx<3)return null;
+  const acute=all[idx].volume;
+  const chronic=(all[idx-1].volume+all[idx-2].volume+all[idx-3].volume)/3;
+  if(!chronic)return null;
+  return (acute/chronic).toFixed(2);
+}
+function acwrBadge(ratio){
+  if(!ratio)return '';
+  const r=parseFloat(ratio);
+  let cls='acwr-ok';
+  if(r>1.3)cls='acwr-alert';
+  else if(r>1.15)cls='acwr-warn';
+  return `<div class="acwr-badge ${cls}">ACWR ${ratio}</div>`;
+}
+
+/* RENDER PLAN */
+function renderPlan(filter){
+  const container=document.getElementById('plan-container');
+  container.innerHTML='';
+  let totalKm=0,totalWeeks=0;
+  const blocs=filter==='all'?BLOCS:BLOCS.filter(b=>b.id===filter);
+
+  blocs.forEach(bloc=>{
+    const div=document.createElement('div');
+    div.innerHTML=`<div class="block-header"><span class="block-name">${bloc.name}</span><span class="block-desc">${bloc.desc}</span></div>`;
+
+    bloc.weeks.forEach(week=>{
+      totalKm+=week.volume; totalWeeks++;
+      const acwr=getAcwr(week.num);
+      const volClass=week.volume>33?'peak':week.volume>27?'high':'';
+      const lblClass=week.type==='decharge'?'decharge':week.type==='peak'?'peak':'';
+
+      const PRIO_LABEL={1:'P1 · Essentiel',2:'P2 · Important',3:'P3 · Optionnel'};
+      const sessHTML=week.sessions.map(s=>{
+        if(!s.type||s.type==='repos'){
+          return `<div class="session-card repos" onclick="openModal(${JSON.stringify(s).replace(/"/g,'&quot;')})"><div class="session-day">${DAYS_SHORT[s.col]}</div><div class="session-type">Repos</div></div>`;
+        }
+        const rpeHTML=s.rpe?`<span class="session-rpe ${RPE_CSS[s.rpe]}">RPE ${s.rpe} — ${RPE_VERB[s.rpe]}</span>`:'';
+        const coupleHTML=s.couple?`<div class="couple-badge">♥</div>`:'';
+        const det=(s.details||'').replace(/\n/g,'<br>');
+        const prio = (s.type==='long'||s.type==='race') ? 1 : (s.col===3 && (s.type==='ef'||s.type==='decharge')) ? 2 : (s.type==='repos') ? 0 : 3;
+        const prioHTML = prio ? `<div class="prio-badge prio-${prio}">${PRIO_LABEL[prio]}</div>` : '';
+        return `<div class="session-card ${s.type}" onclick="openModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">${coupleHTML}${prioHTML}<div class="session-day">${DAYS_SHORT[s.col]}</div><div class="session-type">${s.label}</div><div class="session-details">${det}</div>${s.allure?`<div class="session-allure">${s.allure}</div>`:''}${rpeHTML}</div>`;
+      }).join('');
+
+      const row=document.createElement('div');
+      row.className='week-row';
+      row.dataset.bloc=bloc.id;
+      row.innerHTML=`<div class="week-label ${lblClass}"><strong>S${week.num}</strong>${week.dates}<br>${week.type==='decharge'?'<span style="color:var(--sage);font-size:9px">↓ décharge</span>':week.type==='peak'?'<span style="color:var(--rust);font-size:9px">★ pic</span>':''}</div>${sessHTML}<div class="week-volume"><div class="vol-num">${week.volume}</div><div class="vol-unit">km</div><div class="vol-bar"><div class="vol-fill ${volClass}" style="width:${Math.round(week.volume/MAX_VOL*100)}%"></div></div>${acwrBadge(acwr)}</div>`;
+      div.appendChild(row);
+    });
+    container.appendChild(div);
+  });
+  document.getElementById('weekCounter').textContent=`${totalWeeks} semaines · ${totalKm} km course`;
+}
+
+function filterWeeks(filter,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPlan(filter);
+}
+
+/* MODAL */
+function openModal(s){
+  document.getElementById('mDay').textContent=s.day||'';
+  document.getElementById('mTitle').textContent=s.label||'';
+  let html='';
+  if(s.rpe){
+    html+=`<div class="modal-section"><div class="modal-section-label">Intensité cible</div><div class="rpe-display"><div class="rpe-number" style="color:var(--${s.rpe<=2?'sage':s.rpe<=3?'amber':'rust'})">${s.rpe}/5</div><div><div class="rpe-verb">${RPE_LABELS[s.rpe]}</div><div class="rpe-desc">${s.rpeDesc||RPE_VERB[s.rpe]}</div></div></div></div>`;
+  }
+  if(s.allure){
+    html+=`<div class="modal-section"><div class="modal-section-label">Allure indicative</div><p>${s.allure}</p></div>`;
+  }
+  if(s.details){
+    html+=`<div class="modal-section"><div class="modal-section-label">Déroulé</div><p>${(s.details||'').replace(/\n/g,'<br>')}</p></div>`;
+  }
+  if(s.avant){
+    html+=`<div class="modal-section"><div class="modal-section-label">Avant la séance</div><p>${s.avant}</p></div>`;
+  }
+  if(s.pendant){
+    html+=`<div class="modal-section"><div class="modal-section-label">Pendant</div><p>${s.pendant}</p></div>`;
+  }
+  if(s.apres){
+    html+=`<div class="modal-section"><div class="modal-section-label">Après</div><p>${s.apres}</p></div>`;
+  }
+  document.getElementById('mBody').innerHTML=html||'<p style="color:var(--muted);font-size:13px;font-style:italic;">Repos — récupération active.</p>';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+/* TABS */
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='charge') renderCharts();
+}
+
+/* CHARTS */
+let chartsRendered=false;
+function renderCharts(){
+  if(chartsRendered)return;
+  chartsRendered=true;
+  const all=getAllWeeks();
+  const labels=all.map(w=>`S${w.num}`);
+  const volumes=all.map(w=>w.volume);
+  const acwrs=all.map(w=>{const a=getAcwr(w.num);return a?parseFloat(a):null;});
+  const colors=all.map(w=>w.type==='decharge'?'rgba(200,134,10,0.7)':w.type==='peak'?'rgba(184,76,30,0.85)':'rgba(74,103,65,0.75)');
+
+  /* Chart 1 : Volume + ACWR */
+  const ctx1=document.getElementById('chargeChart').getContext('2d');
+  new Chart(ctx1,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {type:'bar',label:'Volume course (km)',data:volumes,backgroundColor:colors,borderRadius:3,order:2},
+        {type:'line',label:'ACWR',data:acwrs,borderColor:'rgba(184,76,30,0.9)',backgroundColor:'rgba(184,76,30,0.1)',pointBackgroundColor:'rgba(184,76,30,0.9)',pointRadius:4,borderWidth:2,tension:.3,order:1,yAxisID:'y2',spanGaps:true}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?`ACWR: ${ctx.raw}`:` ${ctx.raw} km`}},
+        annotation:{annotations:{
+          zoneWarn:{type:'box',yScaleID:'y2',yMin:1.15,yMax:1.3,backgroundColor:'rgba(200,134,10,0.08)',borderColor:'transparent'},
+          lineOpt:{type:'line',yScaleID:'y2',yMin:1.0,yMax:1.0,borderColor:'rgba(74,103,65,0.4)',borderWidth:1,borderDash:[4,4]}
+        }}
+      },
+      scales:{
+        x:{grid:{color:'rgba(200,192,176,0.3)'},ticks:{font:{family:'DM Mono',size:9},color:'#8a8278'}},
+        y:{grid:{color:'rgba(200,192,176,0.3)'},ticks:{font:{family:'DM Mono',size:9},color:'#8a8278'},title:{display:true,text:'km',font:{family:'DM Mono',size:9},color:'#8a8278'}},
+        y2:{position:'right',min:0.5,max:1.6,grid:{display:false},ticks:{font:{family:'DM Mono',size:9},color:'rgba(184,76,30,0.7)'},title:{display:true,text:'ACWR',font:{family:'DM Mono',size:9},color:'rgba(184,76,30,0.7)'}}
+      }
+    }
+  });
+
+  /* Chart 2 : Volume total */
+  const veloPlan=[30,40,45,0,50,55,45,0,50,40,35,0,40,45,0,0,45,0,0];
+  // pad/align vélo
+  const veloAligned=all.map((_,i)=>veloPlan[i]||0);
+  const ctx2=document.getElementById('totalChart').getContext('2d');
+  new Chart(ctx2,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Course (km)',data:volumes,backgroundColor:'rgba(74,103,65,0.7)',borderRadius:3,stack:'a'},
+        {label:'Vélo estimé (km)',data:veloAligned,backgroundColor:'rgba(26,107,138,0.5)',borderRadius:3,stack:'a'}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},color:'#8a8278'}}},
+      scales:{
+        x:{stacked:true,grid:{color:'rgba(200,192,176,0.3)'},ticks:{font:{family:'DM Mono',size:9},color:'#8a8278'}},
+        y:{stacked:true,grid:{color:'rgba(200,192,176,0.3)'},ticks:{font:{family:'DM Mono',size:9},color:'#8a8278'}}
+      }
+    }
+  });
+}
+
+/* INIT */
+renderPlan('all');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</body>
+</html>
